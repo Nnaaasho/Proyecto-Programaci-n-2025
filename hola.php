@@ -24,4 +24,6 @@ $pais_de_origen = "Uruguay"; // Agregue punto y coma //
 
 $salario = 2000; // Quite el signo "$" adelante del 2000 por error de syntaxis //
 
+define("GRAVEDAD", 9.8); 
+const GRAVEDAD = 9.8; // ambos son constantes, son identificadores que representan un valor unico y no cambian durante la ejecucion del script //
 ?>
