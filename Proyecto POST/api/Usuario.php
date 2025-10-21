@@ -14,10 +14,15 @@ class Usuario {
     }
 
     // Método para registrar un nuevo usuario
-    public function registrar($nombre, $email, $telefono, $razon, $tipo) {
-        // Prepara una consulta para verificar si el email ya existe
+    public function registrar($nombre, $email, $numero, $razon, $tipo) {
+        $sql = "SELECT id FROM usuarios WHERE nombre = :nombre";
+            $stmt = $this->conexion->prepare($sql);
+            // Asocia el parámetro :email con la variable $email
+            $stmt->bindParam(":nombre", $nombre);
+            // Ejecuta la consulta
+            $stmt->execute(); // Prepara una consulta para verificar si el email ya existe
         $sql = "SELECT id FROM usuarios WHERE email = :email";
-        $stmt = $this->conexion->prepare($sql);
+        $stmt  = $this->conexion->prepare($sql);
         // Asocia el parámetro :email con la variable $email
         $stmt->bindParam(":email", $email);
         // Ejecuta la consulta
@@ -28,8 +33,23 @@ class Usuario {
             return [
                 "estado" => "error",
                 "mensaje" => "El correo ya está registrado."
+                
+                
             ];
-        }
+            
+           
+    
+            // Si el email ya está registrado, retorna un mensaje de error
+            if ($stmt->rowCount() > 0) {
+                return [
+                    "estado" => "error",
+                    "mensaje" => "El usuario ya está registrado."
+                    
+                    
+                ];
+                
+            }
+        }   
 
         // Prepara la consulta para insertar un nuevo usuario
         $sql = "INSERT INTO usuarios (nombre, email, telefono, razon, tipo) VALUES (:nombre, :email, :telefono, :razon, :tipo)";
@@ -37,7 +57,7 @@ class Usuario {
         // Asocia los parámetros con las variables correspondientes
         $stmt->bindParam(":nombre", $nombre);
         $stmt->bindParam(":email", $email);
-        $stmt->bindParam(":telefono", $telefono);
+        $stmt->bindParam(":telefono", $numero);
         $stmt->bindParam(":razon", $razon);
         $stmt->bindParam(":tipo", $tipo);
 

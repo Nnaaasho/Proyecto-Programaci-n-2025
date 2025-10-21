@@ -9,14 +9,14 @@ document.getElementById("formRegistro").addEventListener("submit", async (e) => 
   const email = document.getElementById("email").value.trim();
   // Obtiene y limpia el valor del campo password
   const tipo = document.getElementById("tipo").value.trim();
-  const telefono = document.getElementById("telefono").value.trim();
+  const numero = document.getElementById("numero").value.trim();
   const razon = document.getElementById("razon").value.trim();
   
   // Obtiene el elemento donde se mostrarán los mensajes
   const mensaje = document.getElementById("mensaje");
 
   // Verifica si algún campo está vacío
-  if (!nombre || !email || !tipo || !telefono || !razon) {
+  if (!nombre || !email || !tipo || !numero || !razon) {
     // Muestra mensaje de error si hay campos vacíos
     mensaje.textContent = "⚠️ Todos los campos son obligatorios.";
     mensaje.style.color = "red";
@@ -28,15 +28,33 @@ document.getElementById("formRegistro").addEventListener("submit", async (e) => 
     // Muestra mensaje de error si el email no es válido
     mensaje.textContent = "⚠️ Ingresa un correo válido.";
     mensaje.style.color = "red";
+    console.warn("Correo invalido");
     return;
   }
+
+  if (!numero.startsWith('0')) {
+    mensaje.textContent =("El numero no es valido");
+    mensaje.style.color = "red";
+    console.warn("telefono invalido");
+    return;
+    
+  }
+  
+  if(numero.length != 9 ){
+    mensaje.textContent = "⚠️ Ingresa un numero de telefono valido.";
+    mensaje.style.color = "red";
+    return;
+  }
+
+  
+
 
   try {
     // Envía los datos al servidor usando fetch con método POST y formato JSON
     const respuesta = await fetch("api/Registrar.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, email, tipo, telefono, razon })
+      body: JSON.stringify({ nombre, email, tipo, numero, razon })
     });
 
     // Espera la respuesta del servidor en formato JSON

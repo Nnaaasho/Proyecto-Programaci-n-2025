@@ -30,7 +30,7 @@ $data = json_decode($body, true);
 if (
     empty($data['nombre']) ||
     empty($data['email']) ||
-    empty($data['telefono'])||
+    empty($data['numero'])||
     empty($data['tipo'])||
     empty($data['razon'])
 ) {
@@ -58,7 +58,7 @@ $usuario = new Usuario();
 $respuesta = $usuario->registrar(
     trim($data['nombre']),
     trim($data['email']),
-    trim($data['telefono']),
+    trim($data['numero']),
     trim($data['razon']),
     trim($data['tipo'])
 );
