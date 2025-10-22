@@ -6,7 +6,7 @@ CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
-    telefono INT  NOT NULL,
+    numero INT NOT NULL,
     razon VARCHAR(200) NOT NULL,
     tipo VARCHAR(250) NOT NULL,
     

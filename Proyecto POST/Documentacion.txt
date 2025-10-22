@@ -1,0 +1,147 @@
+Hice un sistema que permita registrar usuarios de nuevos proveedores a traves de un formulario web.
+El formulario de los datos del que tendran que llenar son: Nombre, Razon social, Correo electronico, Teléfono, Tipo de producto que ofrece.
+Estos datos deberan enviarse mediante una solicitud POST desde JavaScript hacia una API desarollada en PHP, que se encargara de procesar 
+los datos y subirla a la BDD.
+Con el fin de verificar si los datos estan completos y correctos, si todo sale bien el registro de proveedores se mandarian con exito a
+la BDD, de lo contrario nos indicaria un error con su motivo.
+
+El trabajo lo empece con un 50% realizado por el hecho de que ya teniamos una prueba funcionando de la API con algunas cosas distintas de
+sacar, agregar y verificar.
+
+De lo que saque del proyecto prueba fue un de caso de uso de contraseña que en este caso, los requisitos de la tarea no los pedia.
+Luego agregue Razon social, Teléfono y Tipo de producto. Manteniendo solo Nombre del usuario y Correo electronico en el formulario.
+
+<form id="formRegistro">
+  <input type="text" id="nombre" placeholder="Nombre completo" required>
+  <input type="email" id="email" placeholder="Correo Electrónico" required>
+  <input type="number" id="razon" placeholder="Razon Social" required>
+  <input type="number" id="numero" placeholder="Numero" required>
+  <input type="text" id="tipo" placeholder="Tipo de Producto" required>
+  <button type="submit">Registrar</button>
+</form>
+
+En el JavaScript para obtener los valores del formulario utilice document.ElementById mediante una const 
+
+document.getElementById("formRegistro").addEventListener("submit", async (e) => {
+  // Previene el comportamiento por defecto del formulario (recargar la página)
+  e.preventDefault();
+
+  // Obtiene y limpia el valor del campo nombre
+  const nombre = document.getElementById("nombre").value.trim();
+  // Obtiene y limpia el valor del campo email
+  const email = document.getElementById("email").value.trim();
+  // Obtiene y limpia el valor del campo password
+  const tipo = document.getElementById("tipo").value.trim();
+  const numero = document.getElementById("numero").value.trim();
+  const razon = document.getElementById("razon").value.trim();
+
+  Por ultimo en el JavaScript agregue la verificacion de numero de telefono para que sea valido y no haya ningun error a la hora de enviar
+  los datos. Por ejemplo debe cumplir la cantidad de numeros que se llevaria (9 numeros en total) y por ultimo el tipo de formato comun de
+  numero de telefono al empezar en 0
+
+
+  if (!numero.startsWith('0')) {
+    mensaje.textContent =("El numero no es valido");
+    mensaje.style.color = "red";
+    console.warn("telefono invalido");
+    return;
+    
+  }
+  
+  if(numero.length != 9 ){
+    mensaje.textContent = "⚠️ Ingresa un numero de telefono valido.";
+    mensaje.style.color = "red";
+    return;
+  }
+
+En Usuario.php agregue los datos (Nombre, Razon social, Correo electronico, Teléfono, Tipo de producto que ofrece) sacando datos anteriores, 
+como la contraseña para que se puedan consultar y mandar a la BDD. 
+Luego verifique si el email y usuario del proveedor no existiera para no generar conflictos en la BDD.
+
+ public function registrar($nombre, $email, $numero, $razon, $tipo) {
+        // Verificar si el nombre ya existe
+        $sql = "SELECT id FROM usuarios WHERE nombre = :nombre";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bindParam(":nombre", $nombre);
+        $stmt->execute();
+        
+        if ($stmt->rowCount() > 0) {
+            return [
+                "estado" => "error",
+                "mensaje" => "El nombre de usuario ya está registrado."
+            ];
+        }
+
+        $sql1 = "SELECT id FROM usuarios WHERE email = :email";
+        $stmt = $this->conexion->prepare($sql1);
+        $stmt->bindParam(":email", $email);
+        $stmt->execute();
+        
+        if ($stmt->rowCount() > 0) {
+            return [
+                "estado" => "error",
+                "mensaje" => "El correo electronico ya está registrado."
+            ];
+        }
+
+
+        // Prepara la consulta para insertar un nuevo usuario
+        $sql = "INSERT INTO usuarios (nombre, email, numero, razon, tipo) VALUES (:nombre, :email, :numero, :razon, :tipo)";
+        $stmt = $this->conexion->prepare($sql);
+        // Asocia los parámetros con las variables correspondientes
+        $stmt->bindParam(":nombre", $nombre);
+        $stmt->bindParam(":email", $email);
+        $stmt->bindParam(":numero", $numero);
+        $stmt->bindParam(":razon", $razon);
+        $stmt->bindParam(":tipo", $tipo);
+
+        // Si la inserción es exitosa, retorna un mensaje de éxito y los datos del usuario
+        if ($stmt->execute()) {
+            return [
+                "estado" => "ok",
+                "mensaje" => "Usuario registrado correctamente.",
+                "usuario" => [
+                    "nombre" => $nombre,
+                    "email" => $email,
+                    "numero" => $numero,
+                    "razon" => $razon,
+                    "tipo" => $tipo
+                ]
+            ];
+
+En Registrar.php sucede algo parecido como en Usuario.php solo que verifica que los datos obtenidos no estan vacios para no tener
+la BDD incompleta con campos vacios, si todo se cumple correctamente el usuario podra registrarse.
+
+if (
+    empty($data['nombre']) ||
+    empty($data['email']) ||
+    empty($data['numero'])||
+    empty($data['tipo'])||
+    empty($data['razon'])
+) {
+    // Si algún campo está vacío, responde con código 400 (Bad Request)
+    http_response_code(400);
+    // Devuelve un mensaje de error en formato JSON
+    echo json_encode(["estado" => "error", "mensaje" => "Todos los campos son obligatorios."]);
+    // Termina la ejecución del script
+    exit;
+}
+
+$usuario = new Usuario();
+// Llama al método registrar de la clase Usuario, pasando los datos validados y limpiados
+$respuesta = $usuario->registrar(
+    trim($data['nombre']),
+    trim($data['email']),
+    trim($data['numero']),
+    trim($data['razon']),
+    trim($data['tipo'])
+);
+
+// Devuelve la respuesta del método registrar en formato JSON
+echo json_encode($respuesta);
+?>
+  
+  
+
+
+

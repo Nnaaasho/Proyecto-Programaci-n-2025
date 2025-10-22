@@ -15,49 +15,39 @@ class Usuario {
 
     // Método para registrar un nuevo usuario
     public function registrar($nombre, $email, $numero, $razon, $tipo) {
+        // Verificar si el nombre ya existe
         $sql = "SELECT id FROM usuarios WHERE nombre = :nombre";
-            $stmt = $this->conexion->prepare($sql);
-            // Asocia el parámetro :email con la variable $email
-            $stmt->bindParam(":nombre", $nombre);
-            // Ejecuta la consulta
-            $stmt->execute(); // Prepara una consulta para verificar si el email ya existe
-        $sql = "SELECT id FROM usuarios WHERE email = :email";
-        $stmt  = $this->conexion->prepare($sql);
-        // Asocia el parámetro :email con la variable $email
-        $stmt->bindParam(":email", $email);
-        // Ejecuta la consulta
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bindParam(":nombre", $nombre);
         $stmt->execute();
-
-        // Si el email ya está registrado, retorna un mensaje de error
+        
         if ($stmt->rowCount() > 0) {
             return [
                 "estado" => "error",
-                "mensaje" => "El correo ya está registrado."
-                
-                
+                "mensaje" => "El nombre de usuario ya está registrado."
             ];
-            
-           
-    
-            // Si el email ya está registrado, retorna un mensaje de error
-            if ($stmt->rowCount() > 0) {
-                return [
-                    "estado" => "error",
-                    "mensaje" => "El usuario ya está registrado."
-                    
-                    
-                ];
-                
-            }
-        }   
+        }
+
+        $sql1 = "SELECT id FROM usuarios WHERE email = :email";
+        $stmt = $this->conexion->prepare($sql1);
+        $stmt->bindParam(":email", $email);
+        $stmt->execute();
+        
+        if ($stmt->rowCount() > 0) {
+            return [
+                "estado" => "error",
+                "mensaje" => "El correo electronico ya está registrado."
+            ];
+        }
+
 
         // Prepara la consulta para insertar un nuevo usuario
-        $sql = "INSERT INTO usuarios (nombre, email, telefono, razon, tipo) VALUES (:nombre, :email, :telefono, :razon, :tipo)";
+        $sql = "INSERT INTO usuarios (nombre, email, numero, razon, tipo) VALUES (:nombre, :email, :numero, :razon, :tipo)";
         $stmt = $this->conexion->prepare($sql);
         // Asocia los parámetros con las variables correspondientes
         $stmt->bindParam(":nombre", $nombre);
         $stmt->bindParam(":email", $email);
-        $stmt->bindParam(":telefono", $numero);
+        $stmt->bindParam(":numero", $numero);
         $stmt->bindParam(":razon", $razon);
         $stmt->bindParam(":tipo", $tipo);
 
@@ -68,7 +58,10 @@ class Usuario {
                 "mensaje" => "Usuario registrado correctamente.",
                 "usuario" => [
                     "nombre" => $nombre,
-                    "email" => $email
+                    "email" => $email,
+                    "numero" => $numero,
+                    "razon" => $razon,
+                    "tipo" => $tipo
                 ]
             ];
         } else {
